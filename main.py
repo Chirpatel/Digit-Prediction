@@ -41,7 +41,7 @@ def static_file(path):
 model=0
 def get_model():
     global model
-    model = keras.models.load_model("keras_mnist.h5")
+    model = keras.models.load_model("num_reader.model")
     print(" * Model Loded!")
 
 print(" * Loading Keras Model...")
@@ -67,7 +67,7 @@ def predict():
 
 def find():
 	CATEGORIES=["NORMAL","CNV","DME","DRUSEN"]
-	test=(np.array(resize(imread("test.png"),(28,28,1)))).reshape(1,784)
+	test=(np.array(resize(imread("test.png"),(28,28,1)))).reshape(1,28,28)
 	prediction = model.predict(test)
 	num=np.argmax(prediction[0])
 	print(num)
