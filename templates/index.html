@@ -6,10 +6,16 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+	<div class="Board">
     <canvas id="canvas"></canvas>
-    <a href="#" id="downloader" download="image.png">Download!</a>
-    <button id="Submit" >Predict</button>
-    <p>Prediction: <span id="d-prediction"></span></p>
+		</div>
+    <br><br>
+		 <div id="buttons">
+			<button id="Submit" >Predict</button>
+      <button id="clear" >Clear</button>
+    </div>
+		<br><br>
+    <p><b>Prediction:</b> <span id="d-prediction"></span></p>
 		<script src="/static/canvas.js">   </script>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js" ></script>
 </body>

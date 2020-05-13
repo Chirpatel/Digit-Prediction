@@ -4,8 +4,8 @@ window.addEventListener('load',()=>{
 
     canvas.height = 280;
     canvas.width  = 280;
-		//ctx.fillStyle = 'green';
-    //ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     let painting =false;
     function startPosition(e){
         painting=true;
@@ -28,18 +28,27 @@ window.addEventListener('load',()=>{
     canvas.addEventListener("mouseup",finishedPosition);
     canvas.addEventListener("mousemove",draw);
     document.getElementById("Submit").addEventListener("click",predict);
+		document.getElementById('clear').addEventListener('click', function() {
+    		ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = 'white';
+    		ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }, false);
+
     function predict(){
-        document.getElementById("downloader").download = "image.png";
-        document.getElementById("downloader").href = document.getElementById("canvas").toDataURL()
 						let message = {
 								image: document.getElementById("canvas").toDataURL().replace("data:image/png;base64,","")
 						}
 						console.log(message);
 
 						$.post("https://number-prediction.chir0313.repl.co/",JSON.stringify(message), function(response){
-								$("#d-prediction").text(response.prediction);
-								console.log(response);
+							if(response.prediction!="Invalid"){
+								$("#d-prediction").text(response.prediction+" ("+response.prob+"%)");
+								console.log(response);}
+							else{
+								$("#d-prediction").text("Invalid");
+								console.log(response);								}
 						});
+
 
     }
 

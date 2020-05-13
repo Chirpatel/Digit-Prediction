@@ -1,5 +1,5 @@
 import os
-#os.system('pip install --upgrade pip')
+os.system('pip install --upgrade pip')
 #os.system('pip install tensorflow==2.2.0rc4')
 
 import random, string
@@ -49,7 +49,7 @@ def static_file(path):
 model=0
 def get_model():
     global model
-    model = keras.models.load_model("alphabetmodel (2).model")
+    model = keras.models.load_model("model_trained30.model")
     print(" * Model Loded!")
 
 print(" * Loading Keras Model...")
@@ -71,10 +71,10 @@ def data_uri_to_img(uri):
 def preProcessing(img):
 	img = np.array(img, dtype=np.uint8)
 	img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-	imageio.imwrite('filename1.png', img)
-	#img = cv2.equalizeHist(img)
+	#imageio.imwrite('filename1.png', img)
+	img = cv2.equalizeHist(img)
 	#imageio.imwrite('filename2.png', img)
-	#img = img/255
+	img = img/.255
 	#imageio.imwrite('filename3.png', img)
 	return img
 
@@ -82,7 +82,6 @@ import imageio
 
 @app.route("/",methods=["POST"])
 def predict():
-		CATEGORIES=["NORMAL","CNV","DME","DRUSEN"]
 		message = request.get_json(force=True)
 		#print(message)
 		encoded = message['image']
@@ -92,42 +91,31 @@ def predict():
 			return 
 		img = np.asarray(image)
 		img.astype(np.float32)
-		img = cv2.resize(img,(28,28))
+		img = cv2.resize(img,(128,128))
 		img = preProcessing(img)
 		print(img.shape)
 		imageio.imwrite('filename.png', img)
-		img = img.reshape(-1,28,28,1)
+		img = img.reshape(1,128,128,1)
 		print(img.shape)
-		#classIndex = int(model.predict_classes(img))
+		classIndex = int(model.predict_classes(img))
 		#print(classIndex)
 		predictions = model.predict(img)
 		print(predictions)
 		classIndex=np.argmax(predictions[0])
 		probVal= np.amax(predictions)
-		print(chr(65+classIndex),probVal)
-		response = {
-				'prediction': chr(65+classIndex)
-		}
+		print(classIndex,probVal)
+		if(probVal>0.60):
+			response = {
+					'prediction': str(classIndex),
+					'prob': str(probVal*100)
+			}
+		else:
+			response = {
+					'prediction': str("Invalid"),
+					'prob': "Invalid" 
+			}
+		print(response)
 		return jsonify(response)
-    #decoded = base64.b64decode(encoded)
-    #bytesio=io.BytesIO(decoded)
-    #filename="test.png"
-    #with open(filename, "wb") as outfile:
-    #    outfile.write(bytesio.getbuffer())
-    #num=find(img)
-    
-
-def find(img):
-	#test=(np.array(resize(imread("test.png"),(28,28,1)))).reshape(1,28,28,1)
-
-	prediction = model.predict(test)
-	num=np.argmax(prediction[0])
-	print(num)
-	return  chr(65+num)
-
-
-
-
 
 
 if __name__ == "__main__":  # Makes sure this is the main process
