@@ -1,5 +1,5 @@
 import os
-os.system('pip install --upgrade pip')
+#os.system('pip install --upgrade pip')
 #os.system('pip install tensorflow==2.2.0rc4')
 
 import random, string
@@ -20,6 +20,14 @@ import matplotlib.image as mpimg
 from skimage.io import imread
 from skimage.transform import resize
 import shutil
+import cv2
+import keras
+from PIL import Image
+from io import BytesIO
+import base64
+import logging
+from skimage.io import imread
+from skimage.transform import resize
 
 app = Flask(  # Create a flask app
 	__name__,
@@ -41,37 +49,82 @@ def static_file(path):
 model=0
 def get_model():
     global model
-    model = keras.models.load_model("num_reader.model")
+    model = keras.models.load_model("alphabetmodel (2).model")
     print(" * Model Loded!")
 
 print(" * Loading Keras Model...")
 get_model()
 
+def data_uri_to_img(uri):
+	try:
+		image = base64.b64decode(uri.split(',')[0], validate=True)
+		#print(image)
+		# make the binary image, a PIL image
+		image = Image.open(BytesIO(image))
+		# convert to numpy array
+		image = np.array(image); 
+		return image
+	except Exception as e:
+		logging.exception(e);print('\n')
+		return None
+
+def preProcessing(img):
+	img = np.array(img, dtype=np.uint8)
+	img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	imageio.imwrite('filename1.png', img)
+	#img = cv2.equalizeHist(img)
+	#imageio.imwrite('filename2.png', img)
+	#img = img/255
+	#imageio.imwrite('filename3.png', img)
+	return img
+
+import imageio
+
 @app.route("/",methods=["POST"])
 def predict():
-    CATEGORIES=["NORMAL","CNV","DME","DRUSEN"]
-    message = request.get_json(force=True)
-    print(message)
+		CATEGORIES=["NORMAL","CNV","DME","DRUSEN"]
+		message = request.get_json(force=True)
+		#print(message)
+		encoded = message['image']
+		image = data_uri_to_img(encoded) 
+		if image is None:
+			print("At run_algo(): image is None.")
+			return 
+		img = np.asarray(image)
+		img.astype(np.float32)
+		img = cv2.resize(img,(28,28))
+		img = preProcessing(img)
+		print(img.shape)
+		imageio.imwrite('filename.png', img)
+		img = img.reshape(-1,28,28,1)
+		print(img.shape)
+		#classIndex = int(model.predict_classes(img))
+		#print(classIndex)
+		predictions = model.predict(img)
+		print(predictions)
+		classIndex=np.argmax(predictions[0])
+		probVal= np.amax(predictions)
+		print(chr(65+classIndex),probVal)
+		response = {
+				'prediction': chr(65+classIndex)
+		}
+		return jsonify(response)
+    #decoded = base64.b64decode(encoded)
+    #bytesio=io.BytesIO(decoded)
+    #filename="test.png"
+    #with open(filename, "wb") as outfile:
+    #    outfile.write(bytesio.getbuffer())
+    #num=find(img)
     
-    encoded = message['image']
-    decoded = base64.b64decode(encoded)
-    bytesio=io.BytesIO(decoded)
-    filename="test.png"
-    with open(filename, "wb") as outfile:
-        outfile.write(bytesio.getbuffer())
-    num=find()
-    response = {
-        'prediction': str(num)
-    }
-    return jsonify(response)
 
-def find():
-	CATEGORIES=["NORMAL","CNV","DME","DRUSEN"]
-	test=(np.array(resize(imread("test.png"),(28,28,1)))).reshape(1,28,28)
+def find(img):
+	#test=(np.array(resize(imread("test.png"),(28,28,1)))).reshape(1,28,28,1)
+
 	prediction = model.predict(test)
 	num=np.argmax(prediction[0])
 	print(num)
-	return  num
+	return  chr(65+num)
+
 
 
 

@@ -1,10 +1,11 @@
 window.addEventListener('load',()=>{
-    const cnvas = document.querySelector("#canvas");
+    const canvas = document.querySelector("#canvas");
     const ctx = canvas.getContext('2d');
 
     canvas.height = 280;
     canvas.width  = 280;
-
+		//ctx.fillStyle = 'green';
+    //ctx.fillRect(0, 0, canvas.width, canvas.height);
     let painting =false;
     function startPosition(e){
         painting=true;
@@ -16,8 +17,8 @@ window.addEventListener('load',()=>{
     }
     function draw(e){
         if(!painting) return;
-        ctx.lineWidth=10;
-        ctx.lineCap - "round";
+        ctx.lineWidth=20;
+        ctx.lineCap = "round";
         ctx.lineTo(e.clientX,e.clientY);
         ctx.stroke();
         /*ctx.beginPath();
